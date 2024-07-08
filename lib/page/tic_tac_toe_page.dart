@@ -1,20 +1,44 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:game_hub/model/game_manager.dart';
 import 'package:game_hub/model/room.dart';
 
-class Game extends StatefulWidget {
-  const Game({super.key});
+class TicTacToePage extends StatefulWidget {
+  const TicTacToePage({super.key});
 
   @override
-  State<Game> createState() => _GameState();
+  State<TicTacToePage> createState() => _TicTacToePageState();
 }
 
-class _GameState extends State<Game> {
+class _TicTacToePageState extends State<TicTacToePage> {
+  late GameManager gameManager;
+
+  @override
+  void initState() {
+    super.initState();
+    gameManager = GameManager.instance;
+    gameManager.setOnWinStateChanged((winStatus) {
+      if (winStatus != WinStatus.none) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await gameManager.deleteRoom();
+          Navigator.pop(context);
+          showDialog(
+              context: context,
+              useRootNavigator: false,
+              builder: (context) => AlertDialog(
+                    title: Text(winStatus == WinStatus.win
+                        ? "You won!"
+                        : (winStatus == WinStatus.loss
+                            ? "You lost!"
+                            : "It's a draw!")),
+                  ));
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final gameManager = GameManager.instance;
     if (gameManager.room == null) return const Placeholder();
     return PopScope(
       canPop: false,
@@ -32,24 +56,6 @@ class _GameState extends State<Game> {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Container();
-              }
-
-              WinStatus winStatus = gameManager.getWinStatus();
-              if (winStatus != WinStatus.none) {
-                WidgetsBinding.instance.addPostFrameCallback((_) async {
-                  await gameManager.deleteRoom();
-                  Navigator.pop(context);
-                  showDialog(
-                      context: context,
-                      useRootNavigator: false,
-                      builder: (context) => AlertDialog(
-                            title: Text(winStatus == WinStatus.win
-                                ? "You won!"
-                                : (winStatus == WinStatus.loss
-                                    ? "You lost!"
-                                    : "It's a draw!")),
-                          ));
-                });
               }
               return Center(
                 child: Column(
@@ -72,33 +78,32 @@ class _GameState extends State<Game> {
       ),
     );
   }
-}
 
-Widget _tableWidget(BuildContext context) {
-  GameManager gameManager = GameManager.instance;
-  Room room = gameManager.room!;
-  List<IconData> icons = [Icons.close, Icons.circle_outlined];
-  List<Row> rows = [];
-  for (int i = 0; i < 9; i += 3) {
-    rows.add(Row(
-        mainAxisSize: MainAxisSize.min,
-        children: List<int>.from(room.gameState["board"])
-            .sublist(i, i + 3)
-            .mapIndexed((j, e) => Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: ElevatedButton(
-                        onPressed: () async {
-                          await gameManager.performMove({"position": i + j});
-                        },
-                        child: e == -1
-                            ? const Text("")
-                            : Icon(icons[e], size: 48)),
-                  ),
-                ))
-            .toList()));
+  Widget _tableWidget(BuildContext context) {
+    Room room = gameManager.room!;
+    List<IconData> icons = [Icons.close, Icons.circle_outlined];
+    List<Row> rows = [];
+    for (int i = 0; i < 9; i += 3) {
+      rows.add(Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List<int>.from(room.gameState["board"])
+              .sublist(i, i + 3)
+              .mapIndexed((j, e) => Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: ElevatedButton(
+                          onPressed: () async {
+                            await gameManager.performMove({"position": i + j});
+                          },
+                          child: e == -1
+                              ? const Text("")
+                              : Icon(icons[e], size: 48)),
+                    ),
+                  ))
+              .toList()));
+    }
+    return Column(children: rows);
   }
-  return Column(children: rows);
 }

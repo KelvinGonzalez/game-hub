@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:game_hub/game/rock_paper_scissors.dart';
 import 'package:game_hub/game/tic_tac_toe.dart';
 import 'package:game_hub/model/game_manager.dart';
 import 'package:game_hub/page/home.dart';
 
-import 'model/game.dart';
+FirebaseOptions getOptions() {
+  const appId = kIsWeb
+      ? "1:288296082099:web:316d7ca65ff3eec717eec6"
+      : "1:288296082099:web:316d7ca65ff3eec717eec6"; // Fix android
+  return const FirebaseOptions(
+      apiKey: "AIzaSyCbom6v21H-O0L1B0G7sqjKs92UDWjP4rQ",
+      appId: appId,
+      messagingSenderId: "288296082099",
+      projectId: "game-hub-a86dd");
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp(options: getOptions());
+  await Firebase.initializeApp(options: getOptions());
+  GameManager.instance.setGame(TicTacToe());
   runApp(const MyApp());
-
-  var manager1 = GameManager.getInstance<Game>();
-  var manager2 = GameManager.getInstance<TicTacToe>();
-  var manager3 = GameManager.getInstance<RockPaperScissors>();
-  print("${manager1.getName()}, ${manager2.getName()}, ${manager3.getName()}");
 }
 
 class MyApp extends StatelessWidget {
