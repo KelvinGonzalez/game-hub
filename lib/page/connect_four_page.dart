@@ -76,6 +76,7 @@ class _ConnectFourPageState extends State<ConnectFourPage> {
   }
 
   Widget _boardWidget(BuildContext context) {
+    double size = 40;
     final board = List<int>.from(gameManager.room!.gameState["board"]);
     Widget buttons = Row(
         mainAxisSize: MainAxisSize.min,
@@ -83,16 +84,16 @@ class _ConnectFourPageState extends State<ConnectFourPage> {
             List.generate(
                 ConnectFour.width,
                 (index) => SizedBox(
-                      height: 50,
-                      width: 50,
+                      height: size,
+                      width: size,
                       child: ElevatedButton(
                           onPressed: () async {
                             await gameManager.performMove({"position": index});
                           },
-                          child: const Icon(Icons.touch_app)),
+                          child: const Text("")),
                     )),
-            const SizedBox(
-                height: 50.0, child: VerticalDivider(thickness: 2))));
+            SizedBox(
+                height: size, child: const VerticalDivider(thickness: 2))));
     Widget grid = Row(
       mainAxisSize: MainAxisSize.min,
       children: joinWidgets(
@@ -103,8 +104,8 @@ class _ConnectFourPageState extends State<ConnectFourPage> {
                     children: List.generate(
                         ConnectFour.height,
                         (i) => SizedBox(
-                            width: 50,
-                            height: 50,
+                            width: size,
+                            height: size,
                             child: board[i * ConnectFour.width + j] == -1
                                 ? const Center(child: Text(""))
                                 : Center(
@@ -115,9 +116,9 @@ class _ConnectFourPageState extends State<ConnectFourPage> {
                                                 board[i * ConnectFour.width +
                                                     j]]))))),
                   )),
-          const SizedBox(
-              height: 50.0 * ConnectFour.height,
-              child: VerticalDivider(thickness: 2))),
+          SizedBox(
+              height: size * ConnectFour.height,
+              child: const VerticalDivider(thickness: 2))),
     );
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -125,9 +126,9 @@ class _ConnectFourPageState extends State<ConnectFourPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         grid,
-        const SizedBox(
-            width: 50.0 * (ConnectFour.width + 2),
-            child: Divider(thickness: 2)),
+        SizedBox(
+            width: size * (ConnectFour.width + 2.5),
+            child: const Divider(thickness: 2)),
         buttons
       ],
     );
