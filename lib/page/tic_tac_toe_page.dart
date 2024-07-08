@@ -55,9 +55,6 @@ class _TicTacToePageState extends State<TicTacToePage> {
         body: StreamBuilder(
             stream: gameManager.roomStream!,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container();
-              }
               return Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

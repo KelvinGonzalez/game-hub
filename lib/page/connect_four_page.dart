@@ -55,9 +55,6 @@ class _ConnectFourPageState extends State<ConnectFourPage> {
         body: StreamBuilder(
             stream: gameManager.roomStream,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container();
-              }
               if (!gameManager.hasMinPlayers()) {
                 return const Center(
                     child: Text("Waiting for another player to join..."));
