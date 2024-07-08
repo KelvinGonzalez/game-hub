@@ -19,7 +19,6 @@ FirebaseOptions getOptions() {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: getOptions());
-  GameManager.instance.setGame(TicTacToe());
   runApp(const MyApp());
 }
 

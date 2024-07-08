@@ -1,8 +1,8 @@
 class Player {
   final int id;
-  String? name;
+  String name;
 
-  Player({required this.id, this.name});
+  Player({required this.id, this.name = "Guest"});
 
   Map<String, dynamic> toJson() => {
         "id": id,

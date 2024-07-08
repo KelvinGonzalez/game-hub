@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:game_hub/logic/utils.dart';
 import 'package:game_hub/model/game_manager.dart';
 import 'package:game_hub/model/room.dart';
 
@@ -86,24 +87,34 @@ class _TicTacToePageState extends State<TicTacToePage> {
     for (int i = 0; i < 9; i += 3) {
       rows.add(Row(
           mainAxisSize: MainAxisSize.min,
-          children: List<int>.from(room.gameState["board"])
-              .sublist(i, i + 3)
-              .mapIndexed((j, e) => Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: SizedBox(
-                      width: 100,
-                      height: 100,
-                      child: ElevatedButton(
-                          onPressed: () async {
-                            await gameManager.performMove({"position": i + j});
-                          },
-                          child: e == -1
-                              ? const Text("")
-                              : Icon(icons[e], size: 48)),
-                    ),
-                  ))
-              .toList()));
+          children: joinWidgets(
+              List<int>.from(room.gameState["board"])
+                  .sublist(i, i + 3)
+                  .mapIndexed((j, e) => Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: TextButton(
+                              onPressed: () async {
+                                await gameManager
+                                    .performMove({"position": i + j});
+                              },
+                              child: e == -1
+                                  ? const Text("")
+                                  : Icon(icons[e], size: 48)),
+                        ),
+                      ))
+                  .toList(),
+              const SizedBox(
+                  height: 100,
+                  child: VerticalDivider(thickness: 2, width: 4)))));
     }
-    return Column(children: rows);
+    return Column(
+        children: joinWidgets(
+            rows,
+            const SizedBox(
+                width: (100 + 4 * 2) * 3 + 4 * 2,
+                child: Divider(thickness: 2, height: 4))));
   }
 }

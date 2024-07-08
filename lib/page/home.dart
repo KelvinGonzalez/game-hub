@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game_hub/game/connect_four.dart';
 import 'package:game_hub/game/rock_paper_scissors.dart';
 import 'package:game_hub/game/tic_tac_toe.dart';
 import 'package:game_hub/model/game.dart';
@@ -13,7 +14,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<Game> games = [TicTacToe(), RockPaperScissors()];
+  List<Game> games = [TicTacToe(), RockPaperScissors(), ConnectFour()];
 
   @override
   Widget build(BuildContext context) {

@@ -12,6 +12,7 @@ class RockPaperScissorsPage extends StatefulWidget {
 class _RockPaperScissorsPageState extends State<RockPaperScissorsPage> {
   late GameManager gameManager;
   List<String> choices = ["Rock", "Paper", "Scissors"];
+  final choiceToEmoji = {"Rock": "🪨", "Paper": "📄", "Scissors": "✂"};
   bool _moveEnqueued = false;
 
   @override
@@ -71,18 +72,26 @@ class _RockPaperScissorsPageState extends State<RockPaperScissorsPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Text("Select a choice..."),
-                      Column(
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: choices
                             .map((choice) => Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: ElevatedButton(
+                                  child: SizedBox(
+                                    height: 100,
+                                    width: 100,
+                                    child: ElevatedButton(
                                       onPressed: () async {
                                         await gameManager
                                             .enqueueMove({"choice": choice});
                                       },
-                                      child: SizedBox(
-                                          width: double.infinity,
-                                          child: Center(child: Text(choice)))),
+                                      child: Center(
+                                          child: Text(
+                                        choiceToEmoji[choice]!,
+                                        style: const TextStyle(fontSize: 32),
+                                      )),
+                                    ),
+                                  ),
                                 ))
                             .toList(),
                       ),
