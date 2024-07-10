@@ -4,6 +4,7 @@ import 'package:game_hub/model/game.dart';
 import 'package:game_hub/model/player.dart';
 import 'package:game_hub/model/room.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:game_hub/model/status.dart';
 
 class GameManager {
   static const _collectionPrefix = "Room";
@@ -17,7 +18,7 @@ class GameManager {
   Map<String, dynamic>? _enqueuedMoveData;
 
   // Event functions
-  void Function(WinStatus)? _onWinStateChanged;
+  void Function(WinStatus)? _onGameEnd;
   void Function(PerformMoveStatus)? _onMovePerformed;
   void Function()? _onMoveEnqueued;
 
@@ -49,9 +50,12 @@ class GameManager {
     _roomStream!.listen((snapshot) async {
       if (room != null && snapshot.data() != null) {
         room!.updateFromSnapshot(snapshot.data()!);
-        if (_onWinStateChanged != null) {
-          _onWinStateChanged!(getWinStatus());
+
+        final winStatus = getWinStatus();
+        if (winStatus != WinStatus.none) {
+          await onGameEnd(winStatus);
         }
+
         if (_enqueuedMoveData != null) {
           if (await performMove(_enqueuedMoveData!) ==
               PerformMoveStatus.success) {
@@ -74,8 +78,10 @@ class GameManager {
 
   Future<RoomJoinStatus> joinRoom(
       DocumentSnapshot<Map<String, dynamic>> snapshot) async {
-    if (game == null) return RoomJoinStatus.noGame;
-    if (snapshot.data() == null) return RoomJoinStatus.noData;
+    if (game == null) throw Exception("Game not found. Ensure game is set.");
+    if (snapshot.data() == null) {
+      throw Exception("Snapshot data not available.");
+    }
     Room room = Room.fromSnapshot(snapshot.data()!, game!);
     RoomJoinStatus joinStatus = room.joinRoom(player);
     if (joinStatus != RoomJoinStatus.success) return joinStatus;
@@ -87,8 +93,10 @@ class GameManager {
   }
 
   Future<RoomLeaveStatus> leaveRoom() async {
-    if (game == null) return RoomLeaveStatus.noGame;
-    if (room == null || _reference == null) return RoomLeaveStatus.noRoom;
+    if (game == null) throw Exception("Game not found. Ensure game is set.");
+    if (room == null || _reference == null) {
+      throw Exception("Room reference not set.");
+    }
     RoomLeaveStatus roomLeaveStatus = room!.leaveRoom(player);
     switch (roomLeaveStatus) {
       case RoomLeaveStatus.success:
@@ -120,7 +128,7 @@ class GameManager {
 
   Future<PerformMoveStatus> performMove(Map<String, dynamic> moveData) async {
     if (room == null || _reference == null) {
-      return PerformMoveStatus.noRoom;
+      throw Exception("Room reference not set.");
     }
     PerformMoveStatus performMoveStatus = room!.performMove(moveData, player);
     if (_onMovePerformed != null) _onMovePerformed!(performMoveStatus);
@@ -139,9 +147,32 @@ class GameManager {
     _enqueuedMoveData = moveData;
   }
 
+  Future<void> onGameEnd(WinStatus winStatus) async {
+    if (_onGameEnd != null) {
+      _onGameEnd!(winStatus);
+    }
+    await playAgain();
+  }
+
+  Future<bool> playAgain() async {
+    if (room == null || _reference == null) {
+      throw Exception("Room reference not set.");
+    }
+    if (player != getHost()) return false;
+    room!.playAgain();
+    await _reference!.set(room!.toSnapshot());
+    return true;
+  }
+
   WinStatus getWinStatus() {
-    if (room == null || _reference == null) return WinStatus.noRoom;
+    if (room == null || _reference == null) {
+      throw Exception("Room reference not set.");
+    }
     return room!.getWinStatus(player);
+  }
+
+  Player? getHost() {
+    return room?.players.firstOrNull;
   }
 
   bool hasMinPlayers() {
@@ -159,8 +190,8 @@ class GameManager {
     return room!.getCurrentPlayer();
   }
 
-  void setOnWinStateChanged(void Function(WinStatus) callback) {
-    _onWinStateChanged = callback;
+  void setOnGameEnd(void Function(WinStatus) callback) {
+    _onGameEnd = callback;
   }
 
   void setOnMovePerformed(void Function(PerformMoveStatus) callback) {

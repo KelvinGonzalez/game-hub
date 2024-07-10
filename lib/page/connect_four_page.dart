@@ -4,6 +4,8 @@ import 'package:game_hub/game/connect_four.dart';
 import 'package:game_hub/logic/utils.dart';
 import 'package:game_hub/model/game_manager.dart';
 import 'package:game_hub/model/room.dart';
+import 'package:game_hub/model/status.dart';
+import 'package:game_hub/widget/game_end_alert.dart';
 
 class ConnectFourPage extends StatefulWidget {
   const ConnectFourPage({super.key});
@@ -19,23 +21,11 @@ class _ConnectFourPageState extends State<ConnectFourPage> {
   void initState() {
     super.initState();
     gameManager = GameManager.instance;
-    gameManager.setOnWinStateChanged((winStatus) {
-      if (winStatus != WinStatus.none) {
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          await gameManager.deleteRoom();
-          Navigator.pop(context);
-          showDialog(
-              context: context,
-              useRootNavigator: false,
-              builder: (context) => AlertDialog(
-                    title: Text(winStatus == WinStatus.win
-                        ? "You won!"
-                        : (winStatus == WinStatus.loss
-                            ? "You lost!"
-                            : "It's a draw!")),
-                  ));
-        });
-      }
+    gameManager.setOnGameEnd((winStatus) {
+      showDialog(
+          context: context,
+          useRootNavigator: false,
+          builder: (context) => GameEndAlert(winStatus: winStatus));
     });
   }
 
@@ -109,7 +99,7 @@ class _ConnectFourPageState extends State<ConnectFourPage> {
                                     child: Text("●",
                                         style: TextStyle(
                                             fontSize: 32,
-                                            color: [Colors.red, Colors.blue][
+                                            color: [Colors.red, Colors.yellow][
                                                 board[i * ConnectFour.width +
                                                     j]]))))),
                   )),

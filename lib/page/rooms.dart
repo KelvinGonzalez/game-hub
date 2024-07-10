@@ -3,6 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:game_hub/model/game_manager.dart';
 import 'package:game_hub/model/room.dart';
+import 'package:game_hub/model/status.dart';
 import 'package:game_hub/page/connect_four_page.dart';
 import 'package:game_hub/page/rock_paper_scissors_page.dart';
 import 'package:game_hub/page/tic_tac_toe_page.dart';

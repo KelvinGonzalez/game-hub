@@ -1,45 +1,28 @@
 import 'package:game_hub/model/game.dart';
 import 'package:game_hub/model/player.dart';
-
-enum WinStatus { win, loss, draw, none, noRoom }
-
-enum RoomJoinStatus { success, roomFull, playerFound, noGame, noData }
-
-enum RoomLeaveStatus {
-  success,
-  playerNotFound,
-  gameRestarted,
-  noGame,
-  noRoom,
-  deleted
-}
-
-enum PerformMoveStatus {
-  success,
-  notEnoughPlayers,
-  notCurrentPlayer,
-  gameRuleViolation,
-  noRoom
-}
+import 'package:game_hub/model/status.dart';
 
 class Room {
   List<Player> players;
   Map<String, dynamic> gameState;
   Game game;
   int currentPlayer;
+  int startingPlayer;
 
   Room(
       {required this.game,
       required this.players,
       required this.gameState,
-      required this.currentPlayer});
+      required this.currentPlayer,
+      required this.startingPlayer});
 
   static Room createRoom(Game game, Player player) {
     return Room(
         game: game,
         players: [player],
         gameState: game.getInitialGameState(),
-        currentPlayer: 0);
+        currentPlayer: 0,
+        startingPlayer: 0);
   }
 
   RoomJoinStatus joinRoom(Player player) {
@@ -49,8 +32,9 @@ class Room {
     return RoomJoinStatus.success;
   }
 
-  void restartRoom() {
+  void resetGameState() {
     currentPlayer = 0;
+    startingPlayer = 0;
     gameState = game.getInitialGameState();
   }
 
@@ -63,7 +47,7 @@ class Room {
     players.remove(player);
     if (currentPlayer >= players.length) currentPlayer = 0;
     if (!hasMinPlayers()) {
-      restartRoom();
+      resetGameState();
       return RoomLeaveStatus.gameRestarted;
     }
     return RoomLeaveStatus.success;
@@ -100,6 +84,14 @@ class Room {
     return player == players[winner] ? WinStatus.win : WinStatus.loss;
   }
 
+  void playAgain() {
+    int startingPlayer =
+        game.selectNextStartingPlayer(gameState, this.startingPlayer, players);
+    resetGameState();
+    this.startingPlayer = startingPlayer;
+    currentPlayer = startingPlayer;
+  }
+
   static Room fromSnapshot(Map<String, dynamic> snapshot, Game game) {
     return Room(
         game: game,
@@ -108,7 +100,8 @@ class Room {
             .toList()
             .cast<Player>(),
         gameState: snapshot["gameState"],
-        currentPlayer: snapshot["gameState"]["currentPlayer"]);
+        currentPlayer: snapshot["gameState"]["currentPlayer"],
+        startingPlayer: snapshot["gameState"]["startingPlayer"]);
   }
 
   void updateFromSnapshot(Map<String, dynamic> snapshot) {
@@ -116,12 +109,15 @@ class Room {
     players = room.players;
     gameState = room.gameState;
     currentPlayer = room.currentPlayer;
+    startingPlayer = room.startingPlayer;
   }
 
   Map<String, dynamic> toSnapshot() {
     return {
       "players": players.map((e) => e.toJson()).toList(),
-      "gameState": gameState..addAll({"currentPlayer": currentPlayer}),
+      "gameState": gameState
+        ..addAll(
+            {"currentPlayer": currentPlayer, "startingPlayer": startingPlayer}),
     };
   }
 

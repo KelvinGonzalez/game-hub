@@ -25,9 +25,9 @@ class RockPaperScissors extends Game {
 
   @override
   bool performMove(Map<String, dynamic> moveData,
-      Map<String, dynamic> gameState, int playerIndex) {
+      Map<String, dynamic> gameState, int currentPlayer) {
     if (!strengths.containsKey(moveData["choice"])) return false;
-    gameState["responses"][playerIndex] = moveData["choice"];
+    gameState["responses"][currentPlayer] = moveData["choice"];
     return true;
   }
 

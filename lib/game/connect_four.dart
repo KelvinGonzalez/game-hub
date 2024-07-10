@@ -21,14 +21,14 @@ class ConnectFour extends Game {
 
   @override
   bool performMove(Map<String, dynamic> moveData,
-      Map<String, dynamic> gameState, int playerIndex) {
+      Map<String, dynamic> gameState, int currentPlayer) {
     int position = moveData["position"];
     if (position < 0 || position >= width) return false;
     for (int newPosition = position + width * (height - 1);
         newPosition >= 0;
         newPosition -= width) {
       if (gameState["board"][newPosition] != -1) continue;
-      gameState["board"][newPosition] = playerIndex;
+      gameState["board"][newPosition] = currentPlayer;
       gameState["lastPosition"] = newPosition;
       return true;
     }

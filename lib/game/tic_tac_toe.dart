@@ -18,10 +18,10 @@ class TicTacToe extends Game {
 
   @override
   bool performMove(Map<String, dynamic> moveData,
-      Map<String, dynamic> gameState, int playerIndex) {
+      Map<String, dynamic> gameState, int currentPlayer) {
     if (moveData["position"] < 0 || moveData["position"] >= 9) return false;
     if (gameState["board"][moveData["position"]] != -1) return false;
-    gameState["board"][moveData["position"]] = playerIndex;
+    gameState["board"][moveData["position"]] = currentPlayer;
     return true;
   }
 
