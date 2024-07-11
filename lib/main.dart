@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:game_hub/game/tic_tac_toe.dart';
 import 'package:game_hub/model/game_manager.dart';
 import 'package:game_hub/page/home.dart';
+import 'package:universal_html/html.dart' as html;
 
 FirebaseOptions getOptions() {
   const appId = kIsWeb
@@ -19,6 +19,9 @@ FirebaseOptions getOptions() {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: getOptions());
+  html.window.onBeforeUnload.listen((event) async {
+    await GameManager.instance.leaveRoom();
+  });
   runApp(const MyApp());
 }
 
