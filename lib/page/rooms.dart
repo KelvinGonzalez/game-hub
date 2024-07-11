@@ -42,8 +42,7 @@ class _RoomsState extends State<Rooms> {
         padding: const EdgeInsets.all(8.0),
         child: Column(children: [
           TextField(
-            controller:
-                TextEditingController(text: roomManager.player.name ?? ""),
+            controller: TextEditingController(text: roomManager.player.name),
             decoration: const InputDecoration(labelText: "Player Name"),
             onChanged: (value) {
               roomManager.setPlayerName(value);
@@ -102,8 +101,8 @@ class _RoomsState extends State<Rooms> {
                     MaterialPageRoute(builder: (context) => getGamePage()));
               }
             },
-            child:
-                Text("Id: ${doc.id}, Host: ${room.players.firstOrNull?.name}"),
+            child: Text(
+                "${room.players.firstOrNull?.name} | ${room.players.length}/${gameManager.game?.maxPlayers} players"),
           ))
         ],
       ),
