@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:game_hub/model/game.dart';
@@ -15,6 +16,7 @@ class GameManager {
   Room? room;
   DocumentReference<Map<String, dynamic>>? _reference;
   Stream<DocumentSnapshot<Map<String, dynamic>>>? _roomStream;
+  StreamSubscription? _streamSubscription;
   Map<String, dynamic>? _enqueuedMoveData;
 
   // Event functions
@@ -47,7 +49,7 @@ class GameManager {
     if (_reference == null) return;
     _roomStream = _reference!.snapshots();
     _enqueuedMoveData = null;
-    _roomStream!.listen((snapshot) async {
+    _streamSubscription = _roomStream!.listen((snapshot) async {
       if (room != null && snapshot.data() != null) {
         room!.updateFromSnapshot(snapshot.data()!);
 
@@ -108,6 +110,7 @@ class GameManager {
         await _reference!.set(room!.toSnapshot());
         room = null;
         _reference = null;
+        _streamSubscription?.cancel();
         break;
       case RoomLeaveStatus.playerNotFound:
       default:
@@ -123,6 +126,7 @@ class GameManager {
     await _reference!.delete();
     room = null;
     _reference = null;
+    _streamSubscription?.cancel();
     return true;
   }
 
